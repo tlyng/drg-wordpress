@@ -1,0 +1,18 @@
+{
+    "name": "drg/drg-wordpress",
+    "description": "Development Base for Wordpress plugins",
+    "keywords": ["framework", "wordpress"],
+    "authors": [{
+        "name": "Torkel Lyng",
+        "email": "torkel.lyng@gmail.com"
+    }],
+    "require": {
+        "php": ">= 5.3.0"
+        "monolog/monolog": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "drg\\wordpress\\": "src/drg/wordpress"
+        }
+    }
+}
