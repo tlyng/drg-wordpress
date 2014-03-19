@@ -7,7 +7,7 @@
         "email": "torkel.lyng@gmail.com"
     }],
     "require": {
-        "php": ">= 5.3.0"
+        "php": ">= 5.3.0",
         "monolog/monolog": "dev-master"
     },
     "autoload": {
