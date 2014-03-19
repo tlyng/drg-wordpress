@@ -2,6 +2,7 @@
     "name": "drg/drg-wordpress",
     "description": "Development Base for Wordpress plugins",
     "keywords": ["framework", "wordpress"],
+    "version": "0.1.0",
     "authors": [{
         "name": "Torkel Lyng",
         "email": "torkel.lyng@gmail.com"
