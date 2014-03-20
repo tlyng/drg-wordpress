@@ -101,6 +101,7 @@ abstract class AbstractPlugin {
                     break;
                 case "filter":
                     add_filter($matches['name'], array($this, $matches[0]));
+                    break;
             }
         }
     }
