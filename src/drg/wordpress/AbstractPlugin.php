@@ -33,6 +33,32 @@ namespace drg\wordpress;
  * }
  * ?>
  * </code>
+ *
+ * This class also does some magic reflection in it's constructor, if you have
+ * public methods named "action_something..." or "filter_something.." they
+ * will automatically be hooked up with Wordpress.
+ *
+ * Example:
+ * <code>
+ * <?php
+ * namespace mynamespace;
+ * use \drg\wordpress\AbstractPlugin;
+ *
+ * class Plugin extends AbstractPlugin {
+ *     protected static $class = __CLASS__;
+ *     protected static $plugin_slug = 'mynamespace-plugin';
+ *
+ *     public function action_wp_enqueue_scripts() {
+ *         // This is the same as calling:
+ *         // add_action('wp_enqueue_scripts', array($this, 'action_wp_enqueue_scripts'))
+ *     }
+ *
+ *     public function filter_wp_somefilter() {
+ *         // This is the same as calling:
+ *         // add_filter('wp_somefilter', array($this, 'filter_wp_somefilter'));
+ *     }
+ * }
+ * </code>
  */
 abstract class AbstractPlugin {
     protected static $instance = null;
@@ -62,10 +88,21 @@ abstract class AbstractPlugin {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_styles'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
 
-        // Define custom functionality.
-        // Refer to http://codex.wordpress.org/Plugin_API#Hooks:2C_Actions_and_Filters
-        //add_action('@TODO', array($this, 'action_method_name'));
-        //add_filter('@TODO', array($this, 'filter_method_name'));
+        // Do some reflection to automatically register hooks and filters
+        $ref = new \ReflectionClass($this);
+        $methods = $ref->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+        foreach ($methods as $method) {
+            if (!preg_match('/(?<type>[a-zA-Z0-9]+)_(?<name>\w+)/', $method, $matches))
+                continue;
+            switch ($matches['type']) {
+                case "action":
+                    add_action($matches['name'], array($this, $matches[0]));
+                    break;
+                case "filter":
+                    add_filter($matches['name'], array($this, $matches[0]));
+            }
+        }
     }
 
     /**
