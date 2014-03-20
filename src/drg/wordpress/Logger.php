@@ -3,6 +3,7 @@ namespace drg\wordpress;
 
 use \Monolog\Logger as MonoLogger;
 use \Monolog\Handler\StreamHandler;
+use \Monolog\Handler\BrowserConsoleHandler;
 
 class Logger {
     private function __construct() {
@@ -15,6 +16,9 @@ class Logger {
         $logger->pushHandler(new StreamHandler(WP_PLUGIN_DIR . "/logs/{$name}-error.log", MonoLogger::ERROR));
         $logger->pushHandler(new StreamHandler(WP_PLUGIN_DIR . "/logs/{$name}-debug.log", MonoLogger::DEBUG));
 
+        if (WP_DEBUG) {
+            $logger->pushHandler(new BrowserConsoleHandler(), MonoLogger::DEBUG);
+        }
         return $logger;
     }
 }
