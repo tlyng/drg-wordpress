@@ -8,6 +8,8 @@
 
 namespace drg\wordpress;
 
+use drg\wordpress\Logger;
+
 /**
  * AbstractLoader small baseclass responsible for bootstrapping Wordpress
  * plugins.
@@ -19,8 +21,8 @@ namespace drg\wordpress;
  * use \drg\wordpress\AbstractLoader;
  *
  * class Loader extends AbstractLoader {
- *     protected static $plugin_class = '\\mynamespace\\Plugin';
- *     protected static $plugin_admin_class = '\\mynamespace\\admin\\Plugin';
+ *     protected static $plugins = '\\mynamespace\\Plugin';
+ *     protected static $admin_plugins = '\\mynamespace\\admin\\Plugin';
  * }
  *
  * new Loader();
@@ -36,7 +38,7 @@ abstract class AbstractLoader {
      *
      * @var string
      */
-    protected static $plugin_class = '\\drg\\wordpress\\Plugin';
+    protected static $plugins = null;
 
     /**
      * Name of class to initialize at 'plugins_loaded' action when logged in
@@ -45,7 +47,11 @@ abstract class AbstractLoader {
      *
      * @var string
      */
-    protected static $plugin_admin_class = '\\drg\\wordpress\\admin\\Plugin';
+    protected static $admin_plugins = null;
+
+    private $filename = null;
+    private $namespace = null;
+    private $log = null;
 
     /**
      * Introspects the instance of the class to determine which activation
@@ -54,15 +60,43 @@ abstract class AbstractLoader {
      */
     function __construct() {
         $ref = new \ReflectionClass($this);
-        $filename = $ref->getFileName();
+        $this->filename = $ref->getFileName();
+        $this->namespace = $ref->getNamespaceName();
+        $this->log = Logger::getLogger(addslashes($this->namespace));
 
-        register_activation_hook($filename, array(static::$plugin_class, 'base_activate'));
-        register_deactivation_hook($filename, array(static::$plugin_class, 'base_deactivate'));
+        if (is_array(static::$plugins)) {
+            foreach(static::$plugins as $plugin) {
+                $this->register_plugin($plugin);
+            }
+        } else {
+            $this->register_plugin(static::$plugins);
+        }
 
-        add_action('plugins_loaded', array(static::$plugin_class, 'get_instance'));
+        if (is_array(static::$admin_plugins)) {
+            foreach(static::$admin_plugins as $plugin) {
+                $this->register_admin_plugin($plugin);
+            }
+        } else {
+            $this->register_admin_plugin(static::$admin_plugins);
+        }
+    }
 
-        // if (is_admin() && (!defined('DOING_AJAX') || !DOING_AJAX)) {
-        //     add_action('plugins_loaded', array($this->plugin_admin_class, 'get_instance'));
-        // }
+    private function register_plugin($name) {
+        if (WP_DEBUG) {
+            $this->log->debug("Loading plugin: ".addslashes($name));
+        }
+        register_activation_hook($this->filename, array($name, 'base_activate'));
+        register_deactivation_hook($this->filename, array($name, 'base_deactivate'));
+
+        add_action('plugins_loaded', array($name, 'get_instance'));
+    }
+
+    private function register_admin_plugin($name) {
+        if (WP_DEBUG) {
+            $this->log->debug("Loading admin plugin: ".addslashes($name));
+        }
+        if (is_admin() && (!defined('DOING_AJAX') || !DOING_AJAX)) {
+            add_action('plugins_loaded', array($name, 'get_instance'));
+        }
     }
 }

@@ -77,7 +77,6 @@ abstract class AbstractPlugin {
      */
     protected function __construct() {
         $this->log = Logger::getLogger(static::$plugin_slug);
-
         // Load translations
         add_action('init', array($this, 'load_plugin_textdomain'));
 
@@ -118,7 +117,6 @@ abstract class AbstractPlugin {
         if (static::$instance == null) {
             static::$instance = new static::$class;
         }
-
         return static::$instance;
     }
 
