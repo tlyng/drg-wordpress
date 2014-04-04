@@ -16,9 +16,9 @@ class Logger {
         $logger->pushHandler(new StreamHandler(WP_PLUGIN_DIR . "/logs/{$name}-error.log", MonoLogger::ERROR));
         $logger->pushHandler(new StreamHandler(WP_PLUGIN_DIR . "/logs/{$name}-debug.log", MonoLogger::DEBUG));
 
-        if (WP_DEBUG) {
-            $logger->pushHandler(new BrowserConsoleHandler(), MonoLogger::DEBUG);
-        }
+        // if (WP_DEBUG && (!defined('DOING_AJAX') || !DOING_AJAX)) {
+        //     $logger->pushHandler(new BrowserConsoleHandler(), MonoLogger::DEBUG);
+        // }
         return $logger;
     }
 }

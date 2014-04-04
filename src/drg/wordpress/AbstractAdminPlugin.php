@@ -36,7 +36,7 @@ abstract class AbstractAdminPlugin {
         add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
 
         // Add the options page and menu item
-        add_action('admin_menu', array($this, 'add_plugin_admin_menu'));
+        //add_action('admin_menu', array($this, 'add_plugin_admin_menu'));
 
         // Do some reflection to automatically register hooks and filters
         $ref = new \ReflectionClass($this);
